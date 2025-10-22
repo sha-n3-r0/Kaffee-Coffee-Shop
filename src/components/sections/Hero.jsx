@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 
 const float = keyframes`
@@ -108,6 +109,16 @@ const HeroImage = styled.div`
 `;
 
 const Hero = () => {
+  const navigate = useNavigate();
+
+  const handleOrderNow = () => {
+    navigate('/favourite');
+  };
+
+  const handleViewMenu = () => {
+    navigate('/menu');
+  };
+
   return (
     <HeroContainer>
       <HeroContent>
@@ -119,10 +130,10 @@ const Hero = () => {
             for the ultimate coffee experience.
           </p>
           <HeroButtons>
-            <HeroButton className="primary">
+            <HeroButton className="primary" onClick={handleOrderNow}>
               Order Now
             </HeroButton>
-            <HeroButton className="secondary">
+            <HeroButton className="secondary" onClick={handleViewMenu}>
               View Menu
             </HeroButton>
           </HeroButtons>
