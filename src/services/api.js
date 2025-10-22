@@ -204,7 +204,25 @@ export const api = {
   // Testimonials
   async getTestimonials() {
     await delay(300);
-    return mockData.testimonials;
+    
+    // Get testimonials from localStorage
+    const storedTestimonials = localStorage.getItem('kaffees_testimonials');
+    let testimonials = [];
+    
+    if (storedTestimonials) {
+      try {
+        testimonials = JSON.parse(storedTestimonials);
+      } catch (error) {
+        console.error('Error parsing stored testimonials:', error);
+        testimonials = mockData.testimonials; // Fallback to default
+      }
+    } else {
+      // Initialize with default testimonials if none exist
+      testimonials = [...mockData.testimonials];
+      localStorage.setItem('kaffees_testimonials', JSON.stringify(testimonials));
+    }
+    
+    return testimonials;
   },
 
   async submitTestimonial(data) {
@@ -217,12 +235,44 @@ export const api = {
     const testimonial = {
       id: Date.now(),
       ...data,
-      status: 'pending',
+      status: 'approved', // Auto-approve for demo purposes
       submittedAt: new Date().toISOString()
     };
     
-    mockData.testimonials.push(testimonial);
+    // Get existing testimonials
+    const storedTestimonials = localStorage.getItem('kaffees_testimonials');
+    let testimonials = [];
+    
+    if (storedTestimonials) {
+      try {
+        testimonials = JSON.parse(storedTestimonials);
+      } catch (error) {
+        console.error('Error parsing stored testimonials:', error);
+        testimonials = [...mockData.testimonials];
+      }
+    } else {
+      testimonials = [...mockData.testimonials];
+    }
+    
+    // Add new testimonial
+    testimonials.unshift(testimonial); // Add to beginning of array
+    
+    // Save back to localStorage
+    localStorage.setItem('kaffees_testimonials', JSON.stringify(testimonials));
+    
     return { success: true, message: 'Testimonial submitted successfully!' };
+  },
+
+  // Utility function to clear all testimonials (for testing)
+  clearTestimonials() {
+    localStorage.removeItem('kaffees_testimonials');
+    return { success: true, message: 'Testimonials cleared!' };
+  },
+
+  // Utility function to reset testimonials to default
+  resetTestimonials() {
+    localStorage.setItem('kaffees_testimonials', JSON.stringify(mockData.testimonials));
+    return { success: true, message: 'Testimonials reset to default!' };
   }
 };
 
