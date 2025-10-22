@@ -102,61 +102,190 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 export const api = {
   // Newsletter subscription
   async subscribeNewsletter(email) {
-    await delay(500);
-    
-    if (!email || !email.includes('@')) {
-      throw new Error('Please enter a valid email address');
+    // Try to use real PHP backend first
+    try {
+      const response = await fetch('/api/newsletter.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        return { success: true, message: 'Successfully subscribed to newsletter!' };
+      } else {
+        throw new Error(result.error || 'Failed to subscribe');
+      }
+    } catch (error) {
+      console.warn('PHP backend unavailable, using mock storage:', error.message);
+      
+      // Fallback to mock storage if PHP backend is not available
+      await delay(500);
+      
+      if (!email || !email.includes('@')) {
+        throw new Error('Please enter a valid email address');
+      }
+      
+      // Store in localStorage as fallback
+      const storedNewsletter = localStorage.getItem('kaffees_newsletter');
+      let newsletter = [];
+      
+      if (storedNewsletter) {
+        try {
+          newsletter = JSON.parse(storedNewsletter);
+        } catch (e) {
+          newsletter = [];
+        }
+      }
+      
+      const existing = newsletter.find(sub => sub.email === email);
+      if (existing) {
+        throw new Error('Email already subscribed');
+      }
+      
+      const subscription = {
+        id: Date.now(),
+        email,
+        subscribedAt: new Date().toISOString()
+      };
+      
+      newsletter.push(subscription);
+      localStorage.setItem('kaffees_newsletter', JSON.stringify(newsletter));
+      
+      return { 
+        success: true, 
+        message: 'Newsletter subscription saved locally. Please ensure the backend is running for proper processing.' 
+      };
     }
-    
-    const existing = mockData.newsletter.find(sub => sub.email === email);
-    if (existing) {
-      throw new Error('Email already subscribed');
-    }
-    
-    const subscription = {
-      id: Date.now(),
-      email,
-      subscribedAt: new Date().toISOString()
-    };
-    
-    mockData.newsletter.push(subscription);
-    return { success: true, message: 'Successfully subscribed to newsletter!' };
   },
 
   // Contact form submission
   async submitContact(data) {
-    await delay(500);
-    
-    if (!data.name || !data.email || !data.message) {
-      throw new Error('All fields are required');
+    // Try to use real PHP backend first
+    try {
+      const response = await fetch('/api/contact.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        return { success: true, message: 'Message sent successfully! We\'ll get back to you soon.' };
+      } else {
+        throw new Error(result.error || 'Failed to send message');
+      }
+    } catch (error) {
+      console.warn('PHP backend unavailable, using mock storage:', error.message);
+      
+      // Fallback to mock storage if PHP backend is not available
+      await delay(500);
+      
+      if (!data.name || !data.email || !data.message) {
+        throw new Error('All fields are required');
+      }
+      
+      const contact = {
+        id: Date.now(),
+        ...data,
+        submittedAt: new Date().toISOString()
+      };
+      
+      // Store in localStorage as fallback
+      const storedContacts = localStorage.getItem('kaffees_contacts');
+      let contacts = [];
+      
+      if (storedContacts) {
+        try {
+          contacts = JSON.parse(storedContacts);
+        } catch (e) {
+          contacts = [];
+        }
+      }
+      
+      contacts.unshift(contact);
+      localStorage.setItem('kaffees_contacts', JSON.stringify(contacts));
+      
+      return { 
+        success: true, 
+        message: 'Message saved locally. Please ensure the backend is running for proper delivery.' 
+      };
     }
-    
-    const contact = {
-      id: Date.now(),
-      ...data,
-      submittedAt: new Date().toISOString()
-    };
-    
-    mockData.contacts.push(contact);
-    return { success: true, message: 'Message sent successfully!' };
   },
 
   // Feedback submission
   async submitFeedback(data) {
-    await delay(500);
-    
-    if (!data.name || !data.email || !data.rating) {
-      throw new Error('Name, email, and rating are required');
+    // Try to use real PHP backend first
+    try {
+      const response = await fetch('/api/feedback.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        return { success: true, message: 'Thank you for your feedback! We appreciate your input.' };
+      } else {
+        throw new Error(result.error || 'Failed to submit feedback');
+      }
+    } catch (error) {
+      console.warn('PHP backend unavailable, using mock storage:', error.message);
+      
+      // Fallback to mock storage if PHP backend is not available
+      await delay(500);
+      
+      if (!data.name || !data.email || !data.rating) {
+        throw new Error('Name, email, and rating are required');
+      }
+      
+      const feedback = {
+        id: Date.now(),
+        ...data,
+        submittedAt: new Date().toISOString()
+      };
+      
+      // Store in localStorage as fallback
+      const storedFeedback = localStorage.getItem('kaffees_feedback');
+      let feedbackList = [];
+      
+      if (storedFeedback) {
+        try {
+          feedbackList = JSON.parse(storedFeedback);
+        } catch (e) {
+          feedbackList = [];
+        }
+      }
+      
+      feedbackList.unshift(feedback);
+      localStorage.setItem('kaffees_feedback', JSON.stringify(feedbackList));
+      
+      return { 
+        success: true, 
+        message: 'Feedback saved locally. Please ensure the backend is running for proper processing.' 
+      };
     }
-    
-    const feedback = {
-      id: Date.now(),
-      ...data,
-      submittedAt: new Date().toISOString()
-    };
-    
-    mockData.feedback.push(feedback);
-    return { success: true, message: 'Thank you for your feedback!' };
   },
 
   // Get all products
