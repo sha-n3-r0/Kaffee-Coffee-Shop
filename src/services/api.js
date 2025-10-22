@@ -222,7 +222,16 @@ export const api = {
       localStorage.setItem('kaffees_testimonials', JSON.stringify(testimonials));
     }
     
-    return testimonials;
+    // Sort by submission date (newest first) and limit to 6 latest
+    const sortedTestimonials = testimonials
+      .sort((a, b) => {
+        const dateA = new Date(a.submittedAt || a.createdAt || 0);
+        const dateB = new Date(b.submittedAt || b.createdAt || 0);
+        return dateB - dateA; // Newest first
+      })
+      .slice(0, 6); // Only show 6 latest
+    
+    return sortedTestimonials;
   },
 
   async submitTestimonial(data) {

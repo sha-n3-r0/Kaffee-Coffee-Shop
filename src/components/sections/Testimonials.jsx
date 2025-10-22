@@ -434,7 +434,7 @@ const TestimonialsComponent = () => {
       <Container>
         <SectionTitle>
           <h2>What Our Customers Say</h2>
-          <p>Real experiences from our valued customers</p>
+          <p>Latest experiences from our valued customers</p>
         </SectionTitle>
 
         <TestimonialsGrid>
